@@ -14,11 +14,12 @@ class CameraParams
 private:
 	Mat input_image_;
 public:
+	CameraParams(){};
 	CameraParams(Mat input_image)
 	{
 		input_image_ = input_image;
 	}
-	void GetParams();
+	int GetParams();
 	Mat WrapMatrix();
 };
 #endif // !TESTOPENCV170908_LINEDETECT_XUEJINLIN_CAMERAPARAMS_H_

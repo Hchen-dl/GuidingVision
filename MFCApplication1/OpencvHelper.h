@@ -51,62 +51,6 @@ public :
 
 };
 
-class AngleResult
-{
-private:
-	unsigned char err_angle_[2];//data6=err_angle_[0],data5=err_angle_[1]
-	unsigned char err_offset_[2];//data4=err_offset_[0],data3=err_offset_[1]
-	CString strFID = _T("00000081");
-	int DectoHex(int dec, unsigned char *hex, int length)
-	{
-		int i;
-		for (i = length - 1; i >= 0; i--)
-		{
-			hex[i] = (dec % 256) & 0xFF;
-			dec /= 256;
-		}
-		return 0;
-	}
-	void SetCANData()
-	{
-		can_data_[0] = 77;
-		can_data_[1] = 15;
-		can_data_[2] = 10;
-		can_data_[3] = err_offset_[1];
-		can_data_[4] = err_offset_[0];
-		can_data_[5] = err_angle_[1];
-		can_data_[6] = err_angle_[0];
-		can_data_[7] = 0;
-	}
-	void SetCANFramID()
-	{
-		can_frame_ID[0] = (strFID[1] - 48) + (strFID[0] - 48) * 16;
-		can_frame_ID[1] = (strFID[3] - 48) + (strFID[2] - 48) * 16;
-		can_frame_ID[2] = (strFID[5] - 48) + (strFID[4] - 48) * 16;
-		can_frame_ID[3] = (strFID[7] - 48) + (strFID[6] - 48) * 16;
-	}
-public:
-	AngleResult() {};
-	AngleResult(double angle,double offset)
-	{
-		angle_ = angle;
-		offset_ = offset;
-		UpDate();
-	}
-	int angle_;
-	int offset_;
-	unsigned char can_frame_ID[4];
-	unsigned char can_data_[8];	
-	void UpDate()
-	{
-		//int a = int;
-		DectoHex(angle_ * 128 + 25600, err_angle_, 2);
-		DectoHex(offset_ / 5 + 32000, err_offset_, 2);
-		SetCANData();
-		SetCANFramID();
-	}
-};
-
 enum OpType {
 	OT_ADD,
 	OT_SUB,

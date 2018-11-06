@@ -45,6 +45,9 @@
     <ClInclude Include="base.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="AngleResult.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCApplication1Dlg.cpp">
@@ -69,6 +72,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="test_fundamental.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ControlCAN_CH.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AngleResult.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

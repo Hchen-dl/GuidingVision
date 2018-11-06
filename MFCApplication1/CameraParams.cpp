@@ -18,7 +18,7 @@ int CameraCalibration()
 	cameraparams.GetParams();
 	return 0;
 }
-void CameraParams::GetParams()
+int CameraParams::GetParams()
 
 {
 	ofstream fout("caliberation_result.txt");  /**    保存定标结果的文件     **/
@@ -186,11 +186,13 @@ void CameraParams::GetParams()
 	{
 		cout << "Frame #" << i + 1 << "..." << endl;
 		Mat newCameraMatrix = Mat(3, 3, CV_32FC1, Scalar::all(0));
+		//method 1
 		initUndistortRectifyMap(intrinsic_matrix, distortion_coeffs, R, intrinsic_matrix, image_size, CV_32FC1, mapx, mapy);
-		imwrite("mapx.jpg", mapx);
-		imwrite("mapy.jpg", mapy);
+
 		Mat t = image_Seq[i].clone();
 		cv::remap(image_Seq[i], t, mapx, mapy, INTER_LINEAR);
+		//method 2
+		//
 		string imageFileName;
 		std::stringstream StrStm;
 		StrStm << i + 1;
@@ -199,7 +201,8 @@ void CameraParams::GetParams()
 		imwrite("CalibrationImages\\"+imageFileName, t);
 	}
 	cout << "保存结束" << endl;
-	waitKey(0);
+	return 1;
+	//waitKey(0);
 }
 
 Mat CameraParams::WrapMatrix()
