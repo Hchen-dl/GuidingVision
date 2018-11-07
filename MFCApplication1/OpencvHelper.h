@@ -6,10 +6,15 @@
 using namespace cv;
 using namespace std;
 
+/*
+导航参数，包括：
+	angle航向偏差
+	offset横向偏差
+*/
 typedef struct Result
 {
-	int angle;//航向偏差
-	int offset;//横向偏差
+	int angle=0;//航向偏差
+	int offset=0;//横向偏差
 };
 class OpencvHelper
 {
@@ -22,37 +27,52 @@ public :
 	Mat src_image_;	
 	Mat homography_;
 	Rect ROI_;	
-	VideoCapture videoCapture_;
 	//flags
 	bool do_video_record_;
 	bool do_image_process_;
 	bool do_send_can_msg_;
-
-	//打开相机
-	int OpenCamera(string videopath=NULL);
+		
 	//Mat dst_image_;
-	//获取图像中导航参数
+
+	/*获取图像中导航参数，主函数*/
 	Result GetCropRows();
+
+	/*直线延长*/
 	Vec4i LengthenLine(Vec4i line, Mat draw);
 
-	//获取投影变换后的导航参数
+	/*获取投影变换后的导航参数
+	输入为图像线段两点坐标
+	输出为航向偏差和横向偏差
+	*/
 	Result GetResult(vector<Point2f>line);
 	vector<Result> results;//每次找出line后存储，与之前结果进行比较~决定取舍。
 
-	//S(x)
-	Mat ImgTemplate(Mat Img);
-	void GetImage(bool is_from_camera, bool paused);
+	/*S(x)*/
+	Mat ImgTemplate(Mat Img);/*
+	void GetImage(bool is_from_camera, bool paused);*/
 
 	//ImageProcess
+	/*传统方法求取作物行线
+	灰度转化、二值化、中心点提取、作物行拟合、筛选、参数转换
+	*/
 	vector<Point2f> GetLine_Tradition();
+
+	/*利用纹理求作物行线*/
 	Result GetLine_Texture();
+
+	/*最初版本，利用作物外接椭圆提取中心线*/
 	vector<Point2f> GetLine();
 	int Save(string picpath);
 
 	void SetImage(Mat src);
 	void GreyTransform();
+
+	/*大津法求二值化图像*/
 	void OTSUBinarize();
+
+	/*灰度转换提取绿色特征*/
 	void EXGCalcultate();
+	
 	void DilateImage();
 };
 

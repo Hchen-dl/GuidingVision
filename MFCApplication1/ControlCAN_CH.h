@@ -64,8 +64,9 @@ public:
 	};
 	int Connect()
 	{
-		VCI_StartCAN(m_devtype, m_devind, m_cannum);
+		if(VCI_StartCAN(m_devtype, m_devind, m_cannum))
 		return 1;
+		else return -1;
 	};
 	int Close()
 	{
@@ -75,7 +76,6 @@ public:
 			//Sleep(500);
 			//GetDlgItem(IDC_BTN_CONECTCAN)->SetWindowText(_T("Á¬½Ó"));
 			VCI_CloseDevice(m_devtype, m_devind);
-
 			//KillTimer(ID_TIMER_SHOWCNT);
 			return 1;
 		}
