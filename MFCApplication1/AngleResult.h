@@ -21,7 +21,7 @@ private:
 
 public:
 	AngleResult() {};
-	AngleResult(double angle, double offset)
+	AngleResult(int angle, int offset)
 	{
 		angle_ = angle;
 		offset_ = offset;

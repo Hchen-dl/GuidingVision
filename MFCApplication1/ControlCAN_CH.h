@@ -60,6 +60,7 @@ public:
 
 		//SetTimer(ID_TIMER_SHOWCNT, ID_TIMER_SHOWCNT_TM, NULL);
 		//AfxBeginThread(ReceiveThread, this);
+		return 1;
 	};
 	int Connect()
 	{

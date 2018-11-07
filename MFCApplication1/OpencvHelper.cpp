@@ -5,6 +5,32 @@
 #include "OpencvHelper.h"
 
 using namespace std;
+int OpencvHelper::OpenCamera(string videopath)
+{
+	if (videopath == NULL)
+	{
+		return -1;
+	}
+	videoCapture_.open(1);
+	if (!videoCapture_.isOpened())
+	{
+		cout << "不能初始化摄像头\n";		
+	}
+	videoCapture_.open(0);
+	if (!videoCapture_.isOpened())
+	{
+		cout << "不能初始化摄像头\n";
+		//return -1;
+	}
+	videoCapture_.set(CV_CAP_PROP_FRAME_WIDTH, 1280);
+	videoCapture_.set(CV_CAP_PROP_FRAME_HEIGHT, 1024);
+	videoCapture_.set(CV_CAP_PROP_FPS, 30);
+	videoCapture_.set(CV_CAP_PROP_BRIGHTNESS, 0);
+	videoCapture_.set(CV_CAP_PROP_CONTRAST, 0);
+	videoCapture_.set(CV_CAP_PROP_SATURATION, 64);
+	videoCapture_.set(CV_CAP_PROP_HUE, 0);
+	return 1;
+}
 Result OpencvHelper::GetCropRows()
 {
 	vector<Point2f> cropline;

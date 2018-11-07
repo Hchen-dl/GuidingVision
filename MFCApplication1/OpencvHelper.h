@@ -8,21 +8,28 @@ using namespace std;
 
 typedef struct Result
 {
-	double angle;
-	double offset;
+	int angle;//航向偏差
+	int offset;//横向偏差
 };
 class OpencvHelper
 {
 private:
-	
-public :
-	Mat src_image_;
 	Mat tem_image_;
 	Mat template_image_;
-	Mat homography_;
-	Rect ROI_;
 	Mat grey_image_;
 	Mat thresh_image_;
+public :
+	Mat src_image_;	
+	Mat homography_;
+	Rect ROI_;	
+	VideoCapture videoCapture_;
+	//flags
+	bool do_video_record_;
+	bool do_image_process_;
+	bool do_send_can_msg_;
+
+	//打开相机
+	int OpenCamera(string videopath=NULL);
 	//Mat dst_image_;
 	//获取图像中导航参数
 	Result GetCropRows();
@@ -36,7 +43,7 @@ public :
 	Mat ImgTemplate(Mat Img);
 	void GetImage(bool is_from_camera, bool paused);
 
-	//metohods
+	//ImageProcess
 	vector<Point2f> GetLine_Tradition();
 	Result GetLine_Texture();
 	vector<Point2f> GetLine();
@@ -47,8 +54,6 @@ public :
 	void OTSUBinarize();
 	void EXGCalcultate();
 	void DilateImage();
-
-
 };
 
 enum OpType {

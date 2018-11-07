@@ -1,8 +1,10 @@
 #include "AngleResult.h"
+
 #include <atlstr.h>
 
 void AngleResult::UpDate()
 {
+
 	//set can data
 	can_data_[0] = 0x77;
 	can_data_[1] = 0x15;
