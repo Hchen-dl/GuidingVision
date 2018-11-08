@@ -7,16 +7,20 @@
 using namespace std;
 Result OpencvHelper::GetCropRows()
 {
+	//存储作物行线段坐标
 	vector<Point2f> cropline;
+	//存储横向偏差和航向偏差结果
 	Result result;
 	result.angle = 0;
 	result.offset = 0;
 	//int spatialRad = 7, colorRad = 7, maxPryLevel = 1;
 	//
 	//pyrMeanShiftFiltering(src_image_, src_image_, spatialRad, colorRad, maxPryLevel);
+	
+	/*灰度转换提取绿色特征*/
 	EXGCalcultate();
 	//GreyTransform();
-	OTSUBinarize();
+	OTSUBinarize();/*大津法求二值化图像*/
 	
 	cropline=GetLine_Tradition();
 	//result=GetLine_Texture();
@@ -50,40 +54,45 @@ Mat OpencvHelper::ImgTemplate(Mat Img)
 	reduce(Img, mTemp, 1, CV_REDUCE_SUM);
 	return mTemp;
 }
-void OpencvHelper::GetImage(bool is_from_camera, bool paused)
-{
-	{
-		VideoCapture cap;
-		//cap.open(0);//0 for computer while 1 for USB camera.
-		cap.open("C:\\Users\\ahaiya\\Documents\\FirstYear\\MachineVision\\SampleImages\\CH4.avi");
-		if (!cap.isOpened())
-		{
-			cout << "不能初始化摄像头\n";
-			waitKey(0);
-		}
-		//  //方法2  
-		while (is_from_camera)
-		{
+//void OpencvHelper::GetImage(bool is_from_camera, bool paused)
+//{
+//	{
+//		VideoCapture cap;
+//		//cap.open(0);//0 for computer while 1 for USB camera.
+//		cap.open("C:\\Users\\ahaiya\\Documents\\FirstYear\\MachineVision\\SampleImages\\CH4.avi");
+//		if (!cap.isOpened())
+//		{
+//			cout << "不能初始化摄像头\n";
+//			waitKey(0);
+//		}
+//		//  //方法2  
+//		while (is_from_camera)
+//		{
+//
+//			if (!paused)
+//			{
+//				cap >> tem_image_;				
+//				if (tem_image_.empty())
+//					break;
+//				else
+//				{
+//					ROI_ = Rect(tem_image_.rows / 2, tem_image_.cols / 4,  tem_image_.cols / 2, tem_image_.rows / 2);
+//					src_image_ = tem_image_(ROI_);
+//				}
+//				GetCropRows();
+//
+//				cv::imshow("view", src_image_);    //显示当前帧  
+//				waitKey(20);  //延时30ms  
+//			}
+//			else break;
+//		}
+//	}
+//}
 
-			if (!paused)
-			{
-				cap >> tem_image_;				
-				if (tem_image_.empty())
-					break;
-				else
-				{
-					ROI_ = Rect(tem_image_.rows / 2, tem_image_.cols / 4,  tem_image_.cols / 2, tem_image_.rows / 2);
-					src_image_ = tem_image_(ROI_);
-				}
-				GetCropRows();
-
-				cv::imshow("view", src_image_);    //显示当前帧  
-				waitKey(20);  //延时30ms  
-			}
-			else break;
-		}
-	}
-}
+//ImageProcess
+/*传统方法求取作物行线
+灰度转化、二值化、中心点提取、作物行拟合、筛选、参数转换
+*/
 vector<Point2f> OpencvHelper::GetLine_Tradition()
 {
 	vector<Point2f> crop_line;//直线
@@ -152,6 +161,8 @@ vector<Point2f> OpencvHelper::GetLine_Tradition()
 	//imshow("src", src_image_);
 	return crop_line;
 }
+
+/*利用纹理求作物行线*/
 Result OpencvHelper::GetLine_Texture()
 {
 	Result result;
@@ -226,7 +237,7 @@ Result OpencvHelper::GetLine_Texture()
 	//imshow("template_image_", template_image_);
 	return result;
 }
-
+/*最初版本，利用作物外接椭圆提取中心线*/
 vector<Point2f> OpencvHelper::GetLine()
 {
 	vector<Point2f> crop_line;
@@ -326,6 +337,8 @@ int OpencvHelper::Save(string picpath)
 	}
 	else return 0;
 }
+
+/*灰度转换提取绿色特征*/
 void OpencvHelper::EXGCalcultate()
 {
 	//Mat exgImage;
@@ -333,7 +346,6 @@ void OpencvHelper::EXGCalcultate()
 	std::vector<Mat> channels;
 	//Mat aChannels[3];
 	//src为要分离的Mat对象  
-	//split(src_image_, aChannels);              //利用数组分离  
 	split(src_image_, channels);             //利用vector对象分离  
 	for (int i = 0; i < 3; i++)
 	{
@@ -343,11 +355,12 @@ void OpencvHelper::EXGCalcultate()
 	grey_image_.convertTo(grey_image_, CV_32F);
 	grey_image_ = channels[0] + channels[1] + channels[2];
 	grey_image_.convertTo(grey_image_, CV_8UC1);
-	ROI_ = Rect(30, 30, grey_image_.cols -30, grey_image_.rows-30);
+	//ROI_ = Rect(30, 30, grey_image_.cols -30, grey_image_.rows-30);
 	//namedWindow("exg", CV_WINDOW_KEEPRATIO);
 	//imshow("exg", grey_image_);
 	//("exg", exgImage.cols / 6, exgImage.rows / 6);
 }
+
 void OpencvHelper::GreyTransform()
 {
 	cv::cvtColor(src_image_, grey_image_, CV_BGR2GRAY);
@@ -383,12 +396,18 @@ void OpencvHelper::GreyTransform()
 		}
 	}
 }
+
+/*大津法求二值化图像*/
 void OpencvHelper::OTSUBinarize()
 {
 	threshold(grey_image_, thresh_image_, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 	//namedWindow("thr", CV_WINDOW_KEEPRATIO);
 	//imshow("thr", thresh_image_);
 }
+/*获取投影变换后的导航参数
+输入为图像线段两点坐标
+输出为航向偏差和横向偏差
+*/
 Result OpencvHelper::GetResult(vector<Point2f>line)
 {
 	//float matrix[3][3] = { { 1, 0, 1},{ 0, 1, 0},{ 2, 1, 2 } };
@@ -438,7 +457,7 @@ Result OpencvHelper::GetResult(vector<Point2f>line)
 	//}
 	return result;//angle and reset :向右转方向盘则为正，车辆在路径左边为正；
 };
-
+/*线段延长*/
 Vec4i OpencvHelper::LengthenLine(Vec4i line, Mat draw)
 {
 	cv::Vec4i v = line;

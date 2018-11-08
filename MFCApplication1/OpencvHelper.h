@@ -6,105 +6,74 @@
 using namespace cv;
 using namespace std;
 
+/*
+导航参数，包括：
+	angle航向偏差
+	offset横向偏差
+*/
 typedef struct Result
 {
-	double angle;
-	double offset;
+	int angle=0;//航向偏差
+	int offset=0;//横向偏差
 };
 class OpencvHelper
 {
 private:
-	
-public :
-	Mat src_image_;
 	Mat tem_image_;
 	Mat template_image_;
-	Mat homography_;
-	Rect ROI_;
 	Mat grey_image_;
 	Mat thresh_image_;
+public :
+	Mat src_image_;	
+	Mat homography_;
+	Rect ROI_;	
+	//flags
+	bool do_video_record_;
+	bool do_image_process_;
+	bool do_send_can_msg_;
+		
 	//Mat dst_image_;
-	//获取图像中导航参数
+
+	/*获取图像中导航参数，主函数*/
 	Result GetCropRows();
+
+	/*直线延长*/
 	Vec4i LengthenLine(Vec4i line, Mat draw);
 
-	//获取投影变换后的导航参数
+	/*获取投影变换后的导航参数
+	输入为图像线段两点坐标
+	输出为航向偏差和横向偏差
+	*/
 	Result GetResult(vector<Point2f>line);
 	vector<Result> results;//每次找出line后存储，与之前结果进行比较~决定取舍。
 
-	//S(x)
-	Mat ImgTemplate(Mat Img);
-	void GetImage(bool is_from_camera, bool paused);
+	/*S(x)*/
+	Mat ImgTemplate(Mat Img);/*
+	void GetImage(bool is_from_camera, bool paused);*/
 
-	//metohods
+	//ImageProcess
+	/*传统方法求取作物行线
+	灰度转化、二值化、中心点提取、作物行拟合、筛选、参数转换
+	*/
 	vector<Point2f> GetLine_Tradition();
+
+	/*利用纹理求作物行线*/
 	Result GetLine_Texture();
+
+	/*最初版本，利用作物外接椭圆提取中心线*/
 	vector<Point2f> GetLine();
 	int Save(string picpath);
 
 	void SetImage(Mat src);
 	void GreyTransform();
+
+	/*大津法求二值化图像*/
 	void OTSUBinarize();
+
+	/*灰度转换提取绿色特征*/
 	void EXGCalcultate();
+	
 	void DilateImage();
-
-
-};
-
-class AngleResult
-{
-private:
-	unsigned char err_angle_[2];//data6=err_angle_[0],data5=err_angle_[1]
-	unsigned char err_offset_[2];//data4=err_offset_[0],data3=err_offset_[1]
-	CString strFID = _T("00000081");
-	int DectoHex(int dec, unsigned char *hex, int length)
-	{
-		int i;
-		for (i = length - 1; i >= 0; i--)
-		{
-			hex[i] = (dec % 256) & 0xFF;
-			dec /= 256;
-		}
-		return 0;
-	}
-	void SetCANData()
-	{
-		can_data_[0] = 77;
-		can_data_[1] = 15;
-		can_data_[2] = 10;
-		can_data_[3] = err_offset_[1];
-		can_data_[4] = err_offset_[0];
-		can_data_[5] = err_angle_[1];
-		can_data_[6] = err_angle_[0];
-		can_data_[7] = 0;
-	}
-	void SetCANFramID()
-	{
-		can_frame_ID[0] = (strFID[1] - 48) + (strFID[0] - 48) * 16;
-		can_frame_ID[1] = (strFID[3] - 48) + (strFID[2] - 48) * 16;
-		can_frame_ID[2] = (strFID[5] - 48) + (strFID[4] - 48) * 16;
-		can_frame_ID[3] = (strFID[7] - 48) + (strFID[6] - 48) * 16;
-	}
-public:
-	AngleResult() {};
-	AngleResult(double angle,double offset)
-	{
-		angle_ = angle;
-		offset_ = offset;
-		UpDate();
-	}
-	int angle_;
-	int offset_;
-	unsigned char can_frame_ID[4];
-	unsigned char can_data_[8];	
-	void UpDate()
-	{
-		//int a = int;
-		DectoHex(angle_ * 128 + 25600, err_angle_, 2);
-		DectoHex(offset_ / 5 + 32000, err_offset_, 2);
-		SetCANData();
-		SetCANFramID();
-	}
 };
 
 enum OpType {
